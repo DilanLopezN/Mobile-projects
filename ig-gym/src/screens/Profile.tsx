@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {Alert, Platform}from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
+import * as FileSystem from 'expo-file-system';
+
 import { ScreenHeader } from '@components/ScreenHeader'
 import { UserPhoto } from '@components/UserPhoto'
 import {
@@ -7,7 +11,8 @@ import {
   VStack,
   Skeleton,
   Text,
-  Heading
+  Heading,
+  useToast
 } from 'native-base'
 import { TouchableOpacity } from 'react-native'
 import { Input } from '@components/Input'
@@ -15,11 +20,52 @@ import { Button } from '@components/Button'
 
 export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
+  const [userPhoto, setUserPhoto] = useState(
+    'https://github.com/DilanLopezN.png'
+  )
+
+  const toast = useToast()
+
+  async function handlePickUserPhoto() {
+    setPhotoIsLoading(true)
+
+    try {
+      const { canceled, assets } = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true
+      })
+
+      if (canceled) {
+        return
+      } 
+
+        const photoInfo = await FileSystem.getInfoAsync(assets[0].uri)
+
+        if(Platform.OS === 'android' && photoInfo.exists && (photoInfo.size  / 1024 / 1024 > 5) ) {
+          return toast.show({ title: 'Foto excede 5mb escolha outra por favor', placement: 'top', bgColor: 'red.500'})
+        }
+
+
+        if(Platform.OS === 'ios' && photoInfo.exists && (photoInfo.size  / 1024 / 1024 > 8) ) {
+          return toast.show({ title: 'Foto excede 5mb escolha outra por favor', placement: 'top', bgColor: 'red.500'})
+        }
+
+          setUserPhoto(assets[0].uri)
+    
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setPhotoIsLoading(false)
+    }
+  }
+
   const PHOTO_SIZE = 33
   return (
     <VStack flex={1}>
       <ScreenHeader title="Perfil" />
-      <ScrollView contentContainerStyle={{paddingBottom: 36}}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 36 }}>
         <Center mt={6} px={10}>
           {photoIsLoading ? (
             <Skeleton
@@ -31,13 +77,13 @@ export function Profile() {
             />
           ) : (
             <UserPhoto
-              source={{ uri: 'https://github.com/DilanLopezN.png' }}
+              source={{ uri: userPhoto }}
               alt="Foto do usuário"
               size={PHOTO_SIZE}
             />
           )}
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handlePickUserPhoto}>
             <Text
               color="green.500"
               fontWeight="bold"
@@ -69,7 +115,7 @@ export function Profile() {
             secureTextEntry
           />
 
-          <Button title='Atualizar'  mt={4}/>
+          <Button title="Atualizar" mt={4} />
         </VStack>
       </ScrollView>
     </VStack>

@@ -1,5 +1,4 @@
 import { Center, Heading } from "native-base";
-import { HistoryCard } from "./HistoryCard";
 
 type ScreenHeaderProps = {
   title: string

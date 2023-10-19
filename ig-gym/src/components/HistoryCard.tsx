@@ -7,7 +7,7 @@ export function HistoryCard() {
     justifyContent="space-between" 
     >
       <VStack mr={5} flex={1}>
-        <Heading  numberOfLines={1} color="white" fontSize="md" textTransform="capitalize">Costas</Heading>
+        <Heading   fontFamily="heading" numberOfLines={1} color="white" fontSize="md" textTransform="capitalize">Costas</Heading>
         <Text color="gray.100" fontSize="lg" numberOfLines={1}>Puxada frontal</Text>
       </VStack>
 
